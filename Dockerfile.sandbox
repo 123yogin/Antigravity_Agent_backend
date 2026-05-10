@@ -1,0 +1,22 @@
+# Use a lightweight Python base
+FROM python:3.11-slim
+
+# Install basic development tools
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    vim \
+    jq \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a workspace directory
+WORKDIR /workspace
+
+# Set default shell to bash
+SHELL ["/bin/bash", "-c"]
+
+# Add a welcome message or environment indicators
+RUN echo 'echo "Welcome to Antigravity Sandbox"' >> ~/.bashrc
+
+# Keep the container running
+CMD ["tail", "-f", "/dev/null"]
