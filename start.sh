@@ -7,9 +7,13 @@ echo ""
 
 # Check if Docker is running
 if ! docker info > /dev/null 2>&1; then
-    echo "[ERROR] Docker is not running!"
-    echo "Please start Docker or Docker Desktop and try again."
-    exit 1
+    echo "[INFO] Docker service is not running. Attempting to start..."
+    sudo service docker start
+    sleep 2
+    if ! docker info > /dev/null 2>&1; then
+        echo "[ERROR] Could not start Docker. Please run: sudo service docker start"
+        exit 1
+    fi
 fi
 
 echo "[1/3] Building containers and pulling AI models..."
