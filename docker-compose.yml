@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: antigravity_ollama
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./ollama_init.sh:/app/ollama_init.sh
+    entrypoint: ["/bin/bash", "/app/ollama_init.sh"]
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: antigravity_backend
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /var/run/docker.sock:/var/run/docker.sock # Access host docker for sandbox
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    container_name: antigravity_frontend
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+
+volumes:
+  ollama_data:
